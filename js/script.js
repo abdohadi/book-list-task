@@ -235,12 +235,25 @@ class BookStorage {
 	}
 
 	/*
+	 * Returns cover path of a book from local storage
+	 */ 
+	static getCover(id) {
+		let bookList = this.get();
+
+		let targetBook = bookList.filter(book => {
+			return book.id == id;
+		});
+
+		return targetBook[0].cover;
+	}
+
+	/*
 	 * Removes a book from local storage
 	 */ 
 	static remove(id) {
 		let bookList = this.get();
 
-		let index = bookList.findIndex((book) => {
+		let index = bookList.findIndex(book => {
 			return book.id == id;
 		});
 
@@ -365,15 +378,23 @@ $(function() {
 	// Event: Press "Remove From List" btn to remove a book
 	$(document).on('click', '.remove-btn', (e) => {
 		e.preventDefault();
+		let targetId = e.target.dataset.id;
 
-		// Remove book from LocalStorage
-		BookStorage.remove(e.target.dataset.id);
+		$.ajax({
+			url: 'removeCover.php',
+			method: 'post',
+			data: {cover: BookStorage.getCover(targetId)}
+		})
+		.done(() => {
+			// Remove book from LocalStorage
+			BookStorage.remove(targetId);
 
-		// Remove book from the DOM
-		UI.removeBook(e.target);
+			// Remove book from the DOM
+			UI.removeBook(e.target);
 
-		// Display success msg
-		UI.displayMsg('success', 'Book removed from list successfully'); 
+			// Display success msg
+			UI.displayMsg('success', 'Book removed from list successfully'); 
+		});
 	});
 
 
